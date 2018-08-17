@@ -18,34 +18,23 @@ class Feed extends Component {
       <View style={localStyles.mainContainer}>
         <View style={localStyles.mainHeader}>
           <Text style={localStyles.header}>
-              Node demo
+              Gutenberg {"\n"}Project
           </Text>
         </View>
-      <ScrollView style={{flex:0.6}}>
-        {/* <List>
-          {users.map((user) => (
-            <ListItem
-              key={user.login.username}
-              roundAvatar
-              avatar={{ uri: user.picture.thumbnail }}
-              title={`${user.name.first.toUpperCase()} ${user.name.last.toUpperCase()}`}
-              subtitle={user.email}
-              onPress={() => this.onLearnMore(user)}
-            />
-          ))}
-        </List> */}
-        <List style={{flex:1, flexDirection: 'column'}}>
-        {categories.map((category) => (
-            <ListItem
-              style={localStyles.listItem}
-              key={category.name}
-              title={`${category.name.toUpperCase()}`}
-              onPress={() => this.onLearnMore(category)}
-            />
-          ))}
-        </List>
-      </ScrollView>
-      
+        <View style= {{flex:0.8}}>
+          <List containerStyle={{backgroundColor: '#5c57e2', marginVertical:5  ,borderTopWidth: 0}}>
+          {categories.map((category) => (
+              <ListItem
+                containerStyle={{backgroundColor: '#4e4cc6', marginVertical:5  ,borderBottomWidth: 0}}
+                key={category.name}
+                title={`${category.name.toUpperCase()}`}
+                titleStyle={{ color: 'white', fontWeight: 'bold' }}
+                chevronColor="white"
+                onPress={() => this.onLearnMore(category)}
+              />
+            ))}
+          </List>
+        </View>
       </View>
     );
   }
@@ -59,18 +48,22 @@ const localStyles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     width: '100%',
-    padding: 10
+    padding: 10,
+    backgroundColor: '#5c57e2'
   },
   mainHeader: {
-    flex: 0.4,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 20,
+    flex: 0.2,
+    flexDirection: 'row',
+    justifyContent: 'center'
   },
   header: {
-    fontSize: 40
+    color: 'white',  
+    fontSize: 50,
+    textAlign: 'center'
   },
   listItem: {
-    
+    backgroundColor: '#4e4cc6',
     marginBottom: 15,
   }
 });
