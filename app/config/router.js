@@ -18,7 +18,7 @@ export const Root = createStackNavigator({
   Details: {
     screen: BookDetail,
     navigationOptions: ({ navigation }) => ({
-      title: `${navigation.state.params.name.first.toUpperCase()} ${navigation.state.params.name.last.toUpperCase()}`,
+      title: `${navigation.state.params.name.toUpperCase()}`,
     }),
   },
 });
