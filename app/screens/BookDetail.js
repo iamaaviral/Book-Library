@@ -16,6 +16,7 @@ class BookDetail extends Component {
   this.setState({loading: true});
   const res = await fetch('http://skunkworks.ignitesol.com:8000/books/');
   const result = await res.json();
+  console.log(result.results[1].authors[0].name);
   this.setState({books: result.results, loading:false});
   // for(var i=0; i<this.state.books.length;i++){
   //   console.log(result.results[i].subjects);
@@ -39,9 +40,9 @@ class BookDetail extends Component {
       return (
         <ScrollView>
             <List style={{flex:1, flexDirection: 'column'}}>
-          {this.state.books.map((book) => (
+          {this.state.books.map((book, i) => (
               <ListItem
-                key={book.name}
+                key={i}
                 title= {`${book.title}`}
               />
             ))}

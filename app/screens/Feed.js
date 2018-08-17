@@ -23,10 +23,10 @@ class Feed extends Component {
         </View>
         <View style= {{flex:0.8}}>
           <List containerStyle={{backgroundColor: '#5c57e2', marginVertical:5  ,borderTopWidth: 0}}>
-          {categories.map((category) => (
+          {categories.map((category, i) => (
               <ListItem
                 containerStyle={{backgroundColor: '#4e4cc6', marginVertical:5  ,borderBottomWidth: 0}}
-                key={category.name}
+                key={i}
                 title={`${category.name.toUpperCase()}`}
                 titleStyle={{ color: 'white', fontWeight: 'bold' }}
                 chevronColor="white"
