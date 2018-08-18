@@ -1,12 +1,12 @@
-import React from 'react';
-import { TabNavigator, createStackNavigator } from 'react-navigation';
-import { SearchBar } from 'react-native-elements';
+import React from "react";
+import { TabNavigator, createStackNavigator } from "react-navigation";
+import { SearchBar } from "react-native-elements";
 
-import Feed from '../screens/Feed';
-import Settings from '../screens/Settings';
-import BookDetail from '../screens/BookDetail';
-import Me from '../screens/Me';
-import Search from '../screens/Search';
+import Feed from "../screens/Feed";
+import Settings from "../screens/Settings";
+import BookDetail from "../screens/BookDetail";
+import Me from "../screens/Me";
+import Search from "../screens/Search";
 
 export const Root = createStackNavigator({
   Feed: {
@@ -14,20 +14,18 @@ export const Root = createStackNavigator({
     navigationOptions: {
       // title: 'Feed',
       header: null
-    },
+    }
   },
   Details: {
     screen: BookDetail,
     navigationOptions: ({ navigation }) => ({
-      // title: `${navigation.state.params.name.toUpperCase()}`, 
-    headerStyle: {
-      backgroundColor: '#5c57e2',
+      headerStyle: {
+        backgroundColor: "#5c57e2"
       },
-      headerTintColor: 'white',
-      headerTitle: <Search navigate={navigation} />,
-      // headerLeft: <ProfilePicture />,
-    }),
-  },
+      headerTintColor: "white",
+      headerTitle: <Search navigate={navigation} />
+    })
+  }
 });
 
 // export const Tabs = TabNavigator({
