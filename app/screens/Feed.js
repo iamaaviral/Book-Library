@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import {
   Text,
   View,
-  ScrollView,
   StyleSheet
 } from 'react-native';
 import { List, ListItem } from 'react-native-elements';

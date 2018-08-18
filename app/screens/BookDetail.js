@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ScrollView , Text,View} from 'react-native';
+import { ScrollView , Text,View, ActivityIndicator, StyleSheet} from 'react-native';
 import { Tile, List, ListItem } from 'react-native-elements';
 
 class BookDetail extends Component {
@@ -7,6 +7,7 @@ class BookDetail extends Component {
     super(props);
     this.state = {
       books: [],
+      category_books: [],
       // sectionBooks: [],
       loading: false
     };
@@ -16,31 +17,36 @@ class BookDetail extends Component {
   this.setState({loading: true});
   const res = await fetch('http://skunkworks.ignitesol.com:8000/books/');
   const result = await res.json();
-  console.log(result.results[1].authors[0].name);
-  this.setState({books: result.results, loading:false});
-  // for(var i=0; i<this.state.books.length;i++){
-  //   console.log(result.results[i].subjects);
-  //     this.searchStringInArray(this.props.navigation.state.params.name, result.results[i].subjects,i)
-  // }
-  // console.log(this.state.sectionBooks);
+  this.setState({books: result.results});
+  for(var i=0; i<this.state.books.length;i++){
+    for(var j=0; j< result.results[i].subjects.length; j++){
+      if(result.results[i].subjects[j].search("" +this.props.navigation.state.params.name+ "")> -1){
+
+        this.setState({
+          category_books: [...this.state.category_books, result.results[i]],
+          })
+          break;
+      }else{
+        continue ;
+      }
+    }
+  this.setState({loading: false});
+}
 }
 
   render() {
     // const { picture, name, email, phone, login, dob, location } = this.props.navigation.state.params;
     if(this.state.loading){
       return (
-      <View>
-        <Text>
-          LOADING...
-        </Text>
-      </View>
-      
+          <View style={[styles.container, styles.horizontal]}>
+            <ActivityIndicator size="large" color="#5c57e2" />
+        </View>
       )}
     else{
       return (
         <ScrollView>
             <List style={{flex:1, flexDirection: 'column'}}>
-          {this.state.books.map((book, i) => (
+          {this.state.category_books.map((book, i) => (
               <ListItem
                 key={i}
                 title= {`${book.title}`}
@@ -52,5 +58,17 @@ class BookDetail extends Component {
     }
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center'
+  },
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10
+  }
+})
 
 export default BookDetail;
