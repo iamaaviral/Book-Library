@@ -16,16 +16,13 @@ class Feed extends Component {
   render() {
     return (
       <View style={localStyles.mainContainer}>
-        <View style={localStyles.mainHeader}>
           <Text style={localStyles.header}>
               Gutenberg {"\n"}Project
           </Text>
-        </View>
-        <View style= {{flex:0.8}}>
-          <List containerStyle={{backgroundColor: '#5c57e2', marginVertical:5  ,borderTopWidth: 0}}>
+          <List containerStyle={{flex:1, flexDirection: 'column', justifyContent: 'space-evenly',backgroundColor: '#5c57e2' ,borderTopWidth: 0}}>
           {categories.map((category, i) => (
               <ListItem
-                containerStyle={{backgroundColor: '#4e4cc6', marginVertical:5  ,borderBottomWidth: 0}}
+                containerStyle={{backgroundColor: '#4e4cc6',padding:10,borderBottomWidth: 0}}
                 key={i}
                 title={`${category.name.toUpperCase()}`}
                 titleStyle={{ color: 'white', fontWeight: 'bold' }}
@@ -34,7 +31,6 @@ class Feed extends Component {
               />
             ))}
           </List>
-        </View>
       </View>
     );
   }
@@ -47,23 +43,14 @@ const localStyles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     flexDirection: 'column',
-    width: '100%',
     padding: 10,
     backgroundColor: '#5c57e2'
   },
-  mainHeader: {
-    padding: 20,
-    flex: 0.2,
-    flexDirection: 'row',
-    justifyContent: 'center'
-  },
   header: {
-    color: 'white',  
-    fontSize: 50,
-    textAlign: 'center'
-  },
-  listItem: {
-    backgroundColor: '#4e4cc6',
-    marginBottom: 15,
+    color: 'white',
+    fontSize: 40,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    padding:50
   }
 });
