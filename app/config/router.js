@@ -1,11 +1,12 @@
 import React from 'react';
 import { TabNavigator, createStackNavigator } from 'react-navigation';
-import { Icon } from 'react-native-elements';
+import { SearchBar } from 'react-native-elements';
 
 import Feed from '../screens/Feed';
 import Settings from '../screens/Settings';
 import BookDetail from '../screens/BookDetail';
 import Me from '../screens/Me';
+import Search from '../screens/Search';
 
 export const Root = createStackNavigator({
   Feed: {
@@ -18,7 +19,13 @@ export const Root = createStackNavigator({
   Details: {
     screen: BookDetail,
     navigationOptions: ({ navigation }) => ({
-      title: `${navigation.state.params.name.toUpperCase()}`,
+      // title: `${navigation.state.params.name.toUpperCase()}`, 
+    headerStyle: {
+      backgroundColor: '#5c57e2',
+      },
+      headerTintColor: 'white',
+      headerTitle:  <Search />,
+      // headerLeft: <ProfilePicture />,
     }),
   },
 });

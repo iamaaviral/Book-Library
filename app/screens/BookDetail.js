@@ -30,8 +30,10 @@ class BookDetail extends Component {
         continue ;
       }
     }
-  this.setState({loading: false});
 }
+
+console.log(this.state.category_books);
+this.setState({loading: false});
 }
 
   render() {
@@ -44,16 +46,20 @@ class BookDetail extends Component {
       )}
     else{
       return (
+      <View style={styles.mainContainer}>
+        <Text style={styles.header}>{`${this.props.navigation.state.params.name.toUpperCase()}`}</Text>
         <ScrollView>
             <List style={{flex:1, flexDirection: 'column'}}>
           {this.state.category_books.map((book, i) => (
               <ListItem
                 key={i}
                 title= {`${book.title}`}
+                subtitle= {`${book.authors[0].name}`}
               />
             ))}
           </List>
         </ScrollView>
+      </View>
       );
     }
   }
@@ -68,6 +74,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 10
+  },
+  mainContainer:{
+    padding: 10,
+  },
+  header:{
+    color: '#5c57e2',
+    fontSize: 20,
+    fontWeight: 'bold',
+    padding:5
   }
 })
 
