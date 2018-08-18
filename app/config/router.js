@@ -24,7 +24,7 @@ export const Root = createStackNavigator({
       backgroundColor: '#5c57e2',
       },
       headerTintColor: 'white',
-      headerTitle:  <Search />,
+      headerTitle: <Search navigate={navigation} />,
       // headerLeft: <ProfilePicture />,
     }),
   },
