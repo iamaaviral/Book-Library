@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import {
+  ListView,
   ScrollView,
   Text,
   View,
@@ -13,6 +14,7 @@ class BookDetail extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      dataSource: null,
       books: [],
       searched_books: [],
       // sectionBooks: [],
@@ -20,16 +22,28 @@ class BookDetail extends Component {
     };
   }
 
-  async componentWillMount() {
+ componentWillMount() {
     this.setState({ loading: true });
-    await fetch(
+     fetch(
       "http://skunkworks.ignitesol.com:8000/books/?topic=" +
         this.props.navigation.state.params.name
     )
       .then(response => response.json())
       .then(responseJson => {
-        this.setState({ books: responseJson.results, loading: false });
+        let ds = new ListView.DataSource({
+          rowHasChanged: (r1, r2) => r1 !== r2
+        });
+
+            console.log(responseJson.results);
+          this.setState({
+          dataSource: ds.cloneWithRows(responseJson.results),
+          loading: false
+        });
+        // this.setState({ books: responseJson.results, loading: false });
       })
+      .catch(error => {
+        console.error(error);
+      });
   }
 
   async fetchSearchedBooks() {
@@ -64,7 +78,7 @@ class BookDetail extends Component {
               style={styles.header}
             >{`${this.props.navigation.state.params.name.toUpperCase()}`}</Text>
             <ScrollView>
-              <List style={{ flex: 1, flexDirection: "column" }}>
+              {/* <List style={{ flex: 1, flexDirection: "column" }}>
                 {this.state.books.map((book, i) => (
                   <ListItem
                     key={i}
@@ -72,7 +86,22 @@ class BookDetail extends Component {
                     subtitle={`${book.authors[0].name}`}
                   />
                 ))}
-              </List>
+              </List> */}
+              <ListView
+                dataSource={this.state.dataSource} 
+                renderRow={rowData => {
+                  return (
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.title}>
+                          {rowData.title}
+                        </Text>
+                        <Text >
+                          {rowData.authors[0].name}
+                        </Text>
+                      </View>
+                  );
+                }}
+              />
             </ScrollView>
           </View>
         );
@@ -84,7 +113,7 @@ class BookDetail extends Component {
               style={styles.header}
             >{`${this.props.navigation.state.params.name.toUpperCase()}`}</Text>
             <ScrollView>
-              <List style={{ flex: 1, flexDirection: "column" }}>
+              <List >
                 {this.state.searched_books.map((book, i) => (
                   <ListItem
                     key={i}
@@ -112,6 +141,7 @@ const styles = StyleSheet.create({
     padding: 10
   },
   mainContainer: {
+    marginBottom: 30,
     padding: 10
   },
   header: {
