@@ -6,44 +6,58 @@ import {
   View,
   ActivityIndicator,
   StyleSheet,
-  Button
 } from "react-native";
-import { Tile, List, ListItem } from "react-native-elements";
+import {List, ListItem } from "react-native-elements";
 
 class BookDetail extends Component {
   constructor(props) {
     super(props);
     this.state = {
       dataSource: null,
-      books: [],
+      books: null,
       searched_books: [],
-      // sectionBooks: [],
-      loading: false
+      loading: false,
+      isLoadingMore: false,
+      moreBooks: 1
     };
+    this.fetchMore = this.fetchMore.bind(this);
+    this.fetchData = this.fetchData.bind(this);
+  }
+
+  fetchData(callback) {
+    const params = this.state.moreBooks
+  fetch(`http://skunkworks.ignitesol.com:8000/books/?page=${params}&topic=${this.props.navigation.state.params.name}`)
+      .then(response => response.json())
+      .then(callback)
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  fetchMore() {
+    this.fetchData(responseJson => {
+      const data = this.state.books.concat(responseJson.results);
+      this.setState({
+        dataSource: this.state.dataSource.cloneWithRows(data),
+        isLoadingMore: false,
+        books: data,
+        moreBooks: this.state.moreBooks + 1
+      });
+    });
   }
 
  componentWillMount() {
     this.setState({ loading: true });
-     fetch(
-      "http://skunkworks.ignitesol.com:8000/books/?topic=" +
-        this.props.navigation.state.params.name
-    )
-      .then(response => response.json())
-      .then(responseJson => {
-        let ds = new ListView.DataSource({
-          rowHasChanged: (r1, r2) => r1 !== r2
-        });
-
-            console.log(responseJson.results);
-          this.setState({
-          dataSource: ds.cloneWithRows(responseJson.results),
-          loading: false
-        });
-        // this.setState({ books: responseJson.results, loading: false });
-      })
-      .catch(error => {
-        console.error(error);
+    this.fetchData(responseJson => {
+      let ds = new ListView.DataSource({
+        rowHasChanged: (r1, r2) => r1 !== r2
       });
+        this.setState({
+        dataSource: ds.cloneWithRows(responseJson.results),
+        books: responseJson.results,
+        loading: false
+      });
+    })
   }
 
   async fetchSearchedBooks() {
@@ -99,6 +113,15 @@ class BookDetail extends Component {
                           {rowData.authors[0].name}
                         </Text>
                       </View>
+                  );
+                }}      
+                 onEndReached={() => this.setState({ isLoadingMore: true }, () => this.fetchMore())}
+                renderFooter={() => {
+                  return (
+                    this.state.isLoadingMore &&
+                    <View style={{ flex: 1 }}>
+                      <ActivityIndicator size="small" />
+                    </View>
                   );
                 }}
               />
