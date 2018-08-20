@@ -30,87 +30,39 @@ class BookDetail extends Component {
     );
     const result = await res.json();
     this.setState({ books: result.results, loading: false });
-    //   for(var i=0; i<this.state.books.length;i++){
-    //     for(var j=0; j< result.results[i].subjects.length; j++){
-    //       if(result.results[i].subjects[j].search("" +this.props.navigation.state.params.name+ "")> -1){
-
-    //         this.setState({
-    //           category_books: [...this.state.category_books, result.results[i]],
-    //           })
-    //           break;
-    //       }else{
-    //         continue ;
-    //       }
-    //     }
-    // }
-    // console.log(this.state.category_books);
-    // this.setState({loading: false});
   }
 
-  componentWillUnmount(){
+  componentWillUnmount() {
     this.mounted = false;
   }
 
- async fetchSearchedBooks() {
+  async fetchSearchedBooks() {
     const res = await fetch(
       "http://skunkworks.ignitesol.com:8000/books?search=" +
         this.props.navigation.state.params.searchedBooks
     );
     const result = await res.json();
-    if(result.results.length === 0){
-      console.log("result.results.length === 0");
-        return false;
-    }else{
-      console.log("result.results.length !== 0");
-      // this.setState({ searched_books: result.results });
-      // this.state.searched_books.map((book, i) => (
-      //   console.log(book.id)
-      // ))
-//       var filter_search = this.state.searched_books.filter(function(o1){
-//     // filter out (!) items in result2
-//     return this.state.category_books.some(function(o2){
-//       return o1.id === o2.id;          // assumes unique id
-//   });
-// }).map(function(o){
-//   // use reduce to make objects with only the required properties
-//   // and map to apply this to the filtered array as a whole
-//   return props.reduce(function(newo, name){
-//       newo[name] = o[name];
-//       return newo;
-//   }, {});
-// });
-// let filter_search = result.results.filter(o1 => this.state.books.some(o2 => o1.id === o2.id));
-let filter_search = result.results.filter(o => this.state.books.find(o2 => o.id === o2.id))
-// var filter_search = this.state.category_books.filter((o1) => {
-//   // filter out (!) items in result2
-//   return result.results.some((o2) => {
-//       return o1.id === o2.id;          // assumes unique id
-//   });
-// }).map((o) => {
-//   // use reduce to make objects with only the required properties
-//   // and map to apply this to the filtered array as a whole
-//   return props.reduce(function(newo, name){
-//       newo[name] = o[name];
-//       return newo;
-//   }, {});
-// });
-this.setState({searched_books: filter_search});
-// console.log(this.state.searched_books);
-      this.props.navigation.state.params.searchedBooks === undefined; 
-      return true
+    if (result.results.length === 0) {
+      return false;
+    } else {
+      let filter_search = result.results.filter(o =>
+        this.state.books.find(o2 => o.id === o2.id)
+      );
+      this.setState({ searched_books: filter_search });
+      this.props.navigation.state.params.searchedBooks === undefined;
+      return true;
     }
   }
 
   render() {
-    if (this.props.navigation.state.params.searchedBooks !== undefined) {
-      this.fetchSearchedBooks();
-      if (!this.fetchSearchedBooks()) {
-        return (
-          <View style={[styles.container, styles.horizontal]}>
-            <ActivityIndicator size="large" color="#5c57e2" />
-          </View>
-        );
-      } else {
+    if (this.state.loading) {
+      return (
+        <View style={[styles.container, styles.horizontal]}>
+          <ActivityIndicator size="large" color="#5c57e2" />
+        </View>
+      );
+    } else {
+      if (this.props.navigation.state.params.searchedBooks === undefined) {
         return (
           <View style={styles.mainContainer}>
             <Text
@@ -118,7 +70,7 @@ this.setState({searched_books: filter_search});
             >{`${this.props.navigation.state.params.name.toUpperCase()}`}</Text>
             <ScrollView>
               <List style={{ flex: 1, flexDirection: "column" }}>
-                {this.state.searched_books.map((book, i) => (
+                {this.state.books.map((book, i) => (
                   <ListItem
                     key={i}
                     title={`${book.title}`}
@@ -129,15 +81,8 @@ this.setState({searched_books: filter_search});
             </ScrollView>
           </View>
         );
-      }
-    } else {
-      if (this.state.loading) {
-        return (
-          <View style={[styles.container, styles.horizontal]}>
-            <ActivityIndicator size="large" color="#5c57e2" />
-          </View>
-        );
       } else {
+        this.fetchSearchedBooks();
         return (
           <View style={styles.mainContainer}>
             <Text
@@ -145,7 +90,7 @@ this.setState({searched_books: filter_search});
             >{`${this.props.navigation.state.params.name.toUpperCase()}`}</Text>
             <ScrollView>
               <List style={{ flex: 1, flexDirection: "column" }}>
-                {this.state.books.map((book, i) => (
+                {this.state.searched_books.map((book, i) => (
                   <ListItem
                     key={i}
                     title={`${book.title}`}
