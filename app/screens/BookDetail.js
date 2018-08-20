@@ -14,7 +14,6 @@ class BookDetail extends Component {
     super(props);
     this.state = {
       books: [],
-      category_books: [],
       searched_books: [],
       // sectionBooks: [],
       loading: false
@@ -22,36 +21,32 @@ class BookDetail extends Component {
   }
 
   async componentWillMount() {
-    this.mounted = true;
     this.setState({ loading: true });
-    const res = await fetch(
+    await fetch(
       "http://skunkworks.ignitesol.com:8000/books/?topic=" +
         this.props.navigation.state.params.name
-    );
-    const result = await res.json();
-    this.setState({ books: result.results, loading: false });
-  }
-
-  componentWillUnmount() {
-    this.mounted = false;
+    )
+      .then(response => response.json())
+      .then(responseJson => {
+        this.setState({ books: responseJson.results, loading: false });
+      })
   }
 
   async fetchSearchedBooks() {
-    const res = await fetch(
+    await fetch(
       "http://skunkworks.ignitesol.com:8000/books?search=" +
         this.props.navigation.state.params.searchedBooks
-    );
-    const result = await res.json();
-    if (result.results.length === 0) {
-      return false;
-    } else {
-      let filter_search = result.results.filter(o =>
-        this.state.books.find(o2 => o.id === o2.id)
-      );
-      this.setState({ searched_books: filter_search });
-      this.props.navigation.state.params.searchedBooks === undefined;
-      return true;
-    }
+    )
+      .then(response => response.json())
+      .then(responseJson => {
+        let filter_search = responseJson.results.filter(o =>
+          this.state.books.find(o2 => o.id === o2.id)
+        );
+        this.setState({ searched_books: filter_search });
+      })
+      .catch(error => {
+        console.error(error);
+      });
   }
 
   render() {
@@ -62,7 +57,7 @@ class BookDetail extends Component {
         </View>
       );
     } else {
-      if (this.props.navigation.state.params.searchedBooks === undefined) {
+      if (this.props.navigation.getParam("searchedBooks") == undefined) {
         return (
           <View style={styles.mainContainer}>
             <Text
