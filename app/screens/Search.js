@@ -14,7 +14,7 @@ class Search extends Component {
     let sParameter = this.state.text;
     sParameter = encodeURIComponent(sParameter.trim());
     this.props.navigate.setParams({ searchedBooks: "jgjhgjh" });
-    const screenProps = { searchedBooks:sParameter }
+    const screenProps = { searchedBooks: sParameter };
   }
 
   render() {
@@ -28,7 +28,7 @@ class Search extends Component {
           }}
           inputStyle={{ backgroundColor: "#5c57e2", margin: 0, color: "white" }}
           placeholderTextColor={"#9877f4"}
-          noIcon       
+          noIcon
           placeholder={"Search"}
           onChangeText={text => this.setState({ text })}
           value={this.state.text}

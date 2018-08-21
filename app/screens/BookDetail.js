@@ -4,37 +4,40 @@ import {
   Text,
   View,
   ActivityIndicator,
-  StyleSheet,
+  StyleSheet
 } from "react-native";
-import {SearchBar} from "react-native-elements";
+import { SearchBar } from "react-native-elements";
 
 class BookDetail extends Component {
-
   static navigationOptions = ({ navigation }) => ({
     headerTitle: (
       <View style={{ width: 300 }}>
-      <SearchBar
-        containerStyle={{
-          backgroundColor: "transparent",
-          borderTopColor: "transparent",
-          borderBottomColor: "#9877f4"
-        }}
-        inputStyle={{ backgroundColor: "#5c57e2", margin: 0, color: "white" }}
-        placeholderTextColor={"#9877f4"}
-        noIcon       
-        placeholder={"Search"}
-        clearIcon={{ color: 'red' }}
-        onClear={ () => {
-          navigation.setParams({ sParameter:  undefined}); }
-        }
-        onChangeText={text =>  navigation.setParams({text})}
-        onSubmitEditing={
-          () => {navigation.setParams({ sParameter:  encodeURIComponent(navigation.state.params.text.trim())});}
-      }
-      />
-    </View>
+        <SearchBar
+          containerStyle={{
+            backgroundColor: "transparent",
+            borderTopColor: "transparent",
+            borderBottomColor: "#9877f4"
+          }}
+          inputStyle={{ backgroundColor: "#5c57e2", margin: 0, color: "white" }}
+          placeholderTextColor={"#9877f4"}
+          noIcon
+          placeholder={"Search"}
+          clearIcon={{ color: "red" }}
+          onClear={() => {
+            console.log("Clicked");
+          }}
+          onChangeText={text => navigation.setParams({ text })}
+          onSubmitEditing={() => {
+            navigation.setParams({
+              sParameter: encodeURIComponent(
+                navigation.state.params.text.trim()
+              )
+            });
+          }}
+        />
+      </View>
     )
-  })
+  });
 
   constructor(props) {
     super(props);
@@ -44,7 +47,9 @@ class BookDetail extends Component {
       searched_books: null,
       loading: true,
       isLoadingMore: false,
-      moreBooks: 1
+      moreBooks: `http://skunkworks.ignitesol.com:8000/books/?topic=${
+        this.props.navigation.state.params.name
+      }`
     };
     this.fetchMore = this.fetchMore.bind(this);
     this.fetchData = this.fetchData.bind(this);
@@ -52,16 +57,33 @@ class BookDetail extends Component {
   }
 
   fetchData(callback) {
-    const params = this.state.moreBooks;
-    const search = this.props.navigation.getParam("sParameter") !== undefined
-    ? `&search=${this.props.navigation.getParam("sParameter")}`
-    : "";
-  fetch(`http://skunkworks.ignitesol.com:8000/books/?page=${params}&topic=${this.props.navigation.state.params.name}${search}`)
-      .then(response => response.json())
-      .then(callback)
-      .catch(error => {
-        console.error(error);
-      });
+    let params = this.state.moreBooks !== "" ? this.state.moreBooks : "";
+    let search = this.props.navigation.state.params.sParameter;
+
+    if (this.props.navigation.state.params.sParameter !== undefined) {
+      fetch(
+        `http://skunkworks.ignitesol.com:8000/books/?topic=${
+          this.props.navigation.state.params.name
+        }&search=${search}`
+      )
+        .then(response => response.json())
+        .then(callback)
+        .catch(error => {
+          console.error(error);
+        });
+      // params = "";
+      // search = `&search=${this.props.navigation.state.params.sParameter}`
+    } else {
+      fetch(`${params}`)
+        .then(response => response.json())
+        .then(callback)
+        .catch(error => {
+          console.error(error);
+        });
+    }
+    // const search = this.props.navigation.state.params.sParameter !== undefined
+    // ? `&search=${this.props.navigation.state.params.sParameter}`
+    // : "";
   }
 
   fetchMore() {
@@ -69,46 +91,44 @@ class BookDetail extends Component {
       const data = this.state.books.concat(responseJson.results);
       this.setState({
         dataSource: this.state.dataSource.cloneWithRows(data),
-        isLoadingMore: false,
         books: data,
-        moreBooks: this.state.moreBooks
+        isLoadingMore: false,
+        moreBooks: responseJson.next
       });
     });
   }
 
- componentDidMount() {
+  componentDidMount() {
     this.setState({ loading: true });
     this.fetchData(responseJson => {
       let ds = new ListView.DataSource({
         rowHasChanged: (r1, r2) => r1 !== r2
       });
-        this.setState({
+      this.setState({
         dataSource: ds.cloneWithRows(responseJson.results),
         books: responseJson.results,
         loading: false
       });
-    })
+    });
   }
 
   fetchSearchedBooks() {
-    this.fetchData(responseJson => {     
+    this.fetchData(responseJson => {
       let ds = new ListView.DataSource({
-      rowHasChanged: (r1, r2) => r1 !== r2
+        rowHasChanged: (r1, r2) => r1 !== r2
+      });
+      let filter_search = responseJson.results.filter(o =>
+        this.state.books.find(o2 => o.id === o2.id)
+      );
+      this.setState({
+        searched_books: filter_search,
+        dataSource: ds.cloneWithRows(filter_search)
+      });
     });
-    console.log(responseJson.results);
-        let filter_search = responseJson.results.filter(o =>
-          this.state.books.find(o2 => o.id === o2.id)
-        );
-    console.log(filter_search);
-        this.setState({
-          searched_books: filter_search,        
-          dataSource: ds.cloneWithRows(filter_search),
-        });
-      })
   }
 
   render() {
-    const { sParameter } = this.props.navigation.state.params
+    const { sParameter } = this.props.navigation.state.params;
 
     if (this.state.loading) {
       return (
@@ -125,54 +145,52 @@ class BookDetail extends Component {
             </Text>
             <View style={styles.listItem}>
               <ListView
-                dataSource={this.state.dataSource} 
+                dataSource={this.state.dataSource}
                 renderRow={rowData => {
                   return (
-                      <View style={{ flex: 1 , borderBottomWidth: 1}}>
-                        <Text style={styles.title}>
-                          {rowData.title}
-                        </Text>
-                        <Text style={styles.subtitle}>
-                          {rowData.authors[0].name}
-                        </Text>
-                        </View>
+                    <View style={{ flex: 1, borderBottomWidth: 1 }}>
+                      <Text style={styles.title}>{rowData.title}</Text>
+                      <Text style={styles.subtitle}>
+                        {rowData.authors[0].name}
+                      </Text>
+                    </View>
                   );
-                }}      
-                 onEndReached={() => this.setState({ isLoadingMore: true }, () => this.fetchMore())}
+                }}
+                onEndReached={() =>
+                  this.setState({ isLoadingMore: true }, () => this.fetchMore())
+                }
                 renderFooter={() => {
                   return (
-                    this.state.isLoadingMore &&
-                    <View style={{ flex: 1 }}>
-                      <ActivityIndicator size="large" color="#5c57e2"/>
-                    </View>
+                    this.state.isLoadingMore && (
+                      <View style={{ flex: 1 }}>
+                        <ActivityIndicator size="large" color="#5c57e2" />
+                      </View>
+                    )
                   );
                 }}
               />
             </View>
           </View>
         );
-      }
-      else {
+      } else {
         this.fetchSearchedBooks();
         return (
           <View style={[styles.container, styles.horizontal]}>
             <Text style={styles.header}>
               {`${this.props.navigation.state.params.name.toUpperCase()}`}
             </Text>
-            <View style={styles.listItem}>           
+            <View style={styles.listItem}>
               <ListView
-                dataSource={this.state.dataSource} 
+                dataSource={this.state.dataSource}
                 renderRow={rowData => {
                   return (
-                  <View style={{ flex: 1 , borderBottomWidth: 1}}>
-                  <Text style={styles.title}>
-                    {rowData.title}
-                  </Text>
-                  <Text style={styles.subtitle}>
-                    {rowData.authors[0].name}
-                  </Text>
-                  </View>
-            );
+                    <View style={{ flex: 1, borderBottomWidth: 1 }}>
+                      <Text style={styles.title}>{rowData.title}</Text>
+                      <Text style={styles.subtitle}>
+                        {rowData.authors[0].name}
+                      </Text>
+                    </View>
+                  );
                 }}
               />
             </View>
@@ -195,29 +213,28 @@ const styles = StyleSheet.create({
   },
   listItem: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: '#d6d7da',
-    padding: 6,
+    borderBottomColor: "#d6d7da",
+    padding: 6
   },
   header: {
     color: "#5c57e2",
     fontSize: 20,
     fontWeight: "bold",
-    padding: 5,
-
+    padding: 5
   },
   title: {
     fontSize: 14,
     fontWeight: "bold",
-    textAlign: 'left',
-    marginTop: 6,
+    textAlign: "left",
+    marginTop: 6
   },
   subtitle: {
     fontSize: 10,
-    textAlign: 'left',
-    marginBottom: 6,
-  },
+    textAlign: "left",
+    marginBottom: 6
+  }
 });
 
 export default BookDetail;
