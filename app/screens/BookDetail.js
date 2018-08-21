@@ -16,7 +16,7 @@ class BookDetail extends Component {
       dataSource: null,
       books: null,
       searched_books: null,
-      loading: false,
+      loading: true,
       isLoadingMore: false,
       moreBooks: 1
     };
@@ -45,12 +45,12 @@ class BookDetail extends Component {
         dataSource: this.state.dataSource.cloneWithRows(data),
         isLoadingMore: false,
         books: data,
-        moreBooks: this.state.moreBooks + 1
+        moreBooks: this.state.moreBooks
       });
     });
   }
 
- componentWillMount() {
+ componentDidMount() {
     this.setState({ loading: true });
     this.fetchData(responseJson => {
       let ds = new ListView.DataSource({
@@ -62,6 +62,7 @@ class BookDetail extends Component {
         loading: false
       });
     })
+    console.log("Hooray");
   }
 
   fetchSearchedBooks() {
@@ -90,26 +91,26 @@ class BookDetail extends Component {
         </View>
       );
     } else {
-      if (this.props.navigation.getParam("searchedBooks") == undefined) {
-        console.log("Hooray");
+      // if (this.props.navigation.getParam("searchedBooks") == undefined) {
+        // console.log("Hooray");
         return (
-          <View style={styles.mainContainer}>
-            <Text
-              style={styles.header}
-            >{`${this.props.navigation.state.params.name.toUpperCase()}`}</Text>
-            <ScrollView>
+          <View style={[styles.container, styles.horizontal]}>
+            <Text style={styles.header}>
+              {`${this.props.navigation.state.params.name.toUpperCase()}`}
+            </Text>
+            <View style={styles.listItem}>
               <ListView
                 dataSource={this.state.dataSource} 
                 renderRow={rowData => {
                   return (
-                      <View style={{ flex: 1 }}>
+                      <View style={{ flex: 1 , borderBottomWidth: 1}}>
                         <Text style={styles.title}>
                           {rowData.title}
                         </Text>
-                        <Text >
+                        <Text style={styles.subtitle}>
                           {rowData.authors[0].name}
                         </Text>
-                      </View>
+                        </View>
                   );
                 }}      
                  onEndReached={() => this.setState({ isLoadingMore: true }, () => this.fetchMore())}
@@ -122,47 +123,48 @@ class BookDetail extends Component {
                   );
                 }}
               />
-            </ScrollView>
+            </View>
           </View>
         );
-      } else {
-        console.log("oops");
-        this.fetchSearchedBooks();
-        console.log("oops after function");
-        return (
-          <View style={styles.mainContainer}>
-            <Text
-              style={styles.header}
-            >{`Filtered result ${this.props.navigation.state.params.name.toUpperCase()}`}</Text>
-            <ScrollView>
-              {/* <List >
-                {this.state.searched_books.map((book, i) => (
-                  <ListItem
-                    key={i}
-                    title={`${book.title}`}
-                    subtitle={`${book.authors[0].name}`}
-                  />
-                ))}
-              </List> */}              
-              <ListView
-                dataSource={this.state.dataSource} 
-                renderRow={rowData => {
-                  return (
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.title}>
-                          {rowData.title}
-                        </Text>
-                        <Text >
-                          {rowData.authors[0].name}
-                        </Text>
-                      </View>
-                  );
-                }}
-              />
-            </ScrollView>
-          </View>
-        );
-      }
+      // } 
+      // else {
+      //   console.log("oops");
+      //   this.fetchSearchedBooks();
+      //   console.log("oops after function");
+      //   return (
+      //     <View style={styles.mainContainer}>
+      //       <Text
+      //         style={styles.header}
+      //       >{`Filtered result ${this.props.navigation.state.params.name.toUpperCase()}`}</Text>
+      //       <ScrollView>
+      //         {/* <List >
+      //           {this.state.searched_books.map((book, i) => (
+      //             <ListItem
+      //               key={i}
+      //               title={`${book.title}`}
+      //               subtitle={`${book.authors[0].name}`}
+      //             />
+      //           ))}
+      //         </List> */}              
+      //         <ListView
+      //           dataSource={this.state.dataSource} 
+      //           renderRow={rowData => {
+      //             return (
+      //                 <View style={{ flex: 1 }}>
+      //                   <Text style={styles.title}>
+      //                     {rowData.title}
+      //                   </Text>
+      //                   <Text >
+      //                     {rowData.authors[0].name}
+      //                   </Text>
+      //                 </View>
+      //             );
+      //           }}
+      //         />
+      //       </ScrollView>
+      //     </View>
+      //   );
+      // }
     }
   }
 }
@@ -173,20 +175,40 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   horizontal: {
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "space-around",
     padding: 10
   },
-  mainContainer: {
-    marginBottom: 30,
-    padding: 10
+  listItem: {
+    flex: 1,
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#d6d7da',
+    padding: 6,
   },
+  // mainContainer: {
+  //   flex: 1,
+  //   marginBottom: 30,
+  //   padding: 10
+  // },
   header: {
     color: "#5c57e2",
     fontSize: 20,
     fontWeight: "bold",
-    padding: 5
-  }
+    padding: 5,
+
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: "bold",
+    textAlign: 'left',
+    marginTop: 6,
+  },
+  subtitle: {
+    fontSize: 10,
+    textAlign: 'left',
+    marginBottom: 6,
+  },
 });
 
 export default BookDetail;
