@@ -10,11 +10,11 @@ class Search extends Component {
     };
   }
 
-  handlerFromParent(evt) {
-    evt.preventDefault();
+  handleSubmit() {
     let sParameter = this.state.text;
     sParameter = encodeURIComponent(sParameter.trim());
-    this.props.navigate.setParams({ searchedBooks: sParameter });
+    this.props.navigate.setParams({ searchedBooks: "jgjhgjh" });
+    const screenProps = { searchedBooks:sParameter }
   }
 
   render() {
@@ -32,7 +32,7 @@ class Search extends Component {
           placeholder={"Search"}
           onChangeText={text => this.setState({ text })}
           value={this.state.text}
-          onSubmitEditing={this.handlerFromParent.bind(this)}
+          onSubmitEditing={this.handleSubmit.bind(this)}
         />
       </View>
     );

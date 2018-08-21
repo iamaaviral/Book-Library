@@ -1,15 +1,41 @@
 import React, { Component } from "react";
 import {
   ListView,
-  ScrollView,
   Text,
   View,
   ActivityIndicator,
   StyleSheet,
 } from "react-native";
-import {List, ListItem } from "react-native-elements";
+import {SearchBar} from "react-native-elements";
 
 class BookDetail extends Component {
+
+  static navigationOptions = ({ navigation }) => ({
+    headerTitle: (
+      <View style={{ width: 300 }}>
+      <SearchBar
+        containerStyle={{
+          backgroundColor: "transparent",
+          borderTopColor: "transparent",
+          borderBottomColor: "#9877f4"
+        }}
+        inputStyle={{ backgroundColor: "#5c57e2", margin: 0, color: "white" }}
+        placeholderTextColor={"#9877f4"}
+        noIcon       
+        placeholder={"Search"}
+        clearIcon={{ color: 'red' }}
+        onClear={ () => {
+          navigation.setParams({ sParameter:  undefined}); }
+        }
+        onChangeText={text =>  navigation.setParams({text})}
+        onSubmitEditing={
+          () => {navigation.setParams({ sParameter:  encodeURIComponent(navigation.state.params.text.trim())});}
+      }
+      />
+    </View>
+    )
+  })
+
   constructor(props) {
     super(props);
     this.state = {
@@ -27,8 +53,8 @@ class BookDetail extends Component {
 
   fetchData(callback) {
     const params = this.state.moreBooks;
-    const search = this.props.navigation.getParam("searchedBooks") !== undefined
-    ? `&search=${this.props.navigation.getParam("searchedBooks")}`
+    const search = this.props.navigation.getParam("sParameter") !== undefined
+    ? `&search=${this.props.navigation.getParam("sParameter")}`
     : "";
   fetch(`http://skunkworks.ignitesol.com:8000/books/?page=${params}&topic=${this.props.navigation.state.params.name}${search}`)
       .then(response => response.json())
@@ -62,7 +88,6 @@ class BookDetail extends Component {
         loading: false
       });
     })
-    console.log("Hooray");
   }
 
   fetchSearchedBooks() {
@@ -74,9 +99,8 @@ class BookDetail extends Component {
         let filter_search = responseJson.results.filter(o =>
           this.state.books.find(o2 => o.id === o2.id)
         );
-        
     console.log(filter_search);
-        this.setState({ 
+        this.setState({
           searched_books: filter_search,        
           dataSource: ds.cloneWithRows(filter_search),
         });
@@ -84,6 +108,8 @@ class BookDetail extends Component {
   }
 
   render() {
+    const { sParameter } = this.props.navigation.state.params
+
     if (this.state.loading) {
       return (
         <View style={[styles.container, styles.horizontal]}>
@@ -91,8 +117,7 @@ class BookDetail extends Component {
         </View>
       );
     } else {
-      // if (this.props.navigation.getParam("searchedBooks") == undefined) {
-        // console.log("Hooray");
+      if (sParameter == undefined) {
         return (
           <View style={[styles.container, styles.horizontal]}>
             <Text style={styles.header}>
@@ -118,7 +143,7 @@ class BookDetail extends Component {
                   return (
                     this.state.isLoadingMore &&
                     <View style={{ flex: 1 }}>
-                      <ActivityIndicator size="small" />
+                      <ActivityIndicator size="large" color="#5c57e2"/>
                     </View>
                   );
                 }}
@@ -126,45 +151,34 @@ class BookDetail extends Component {
             </View>
           </View>
         );
-      // } 
-      // else {
-      //   console.log("oops");
-      //   this.fetchSearchedBooks();
-      //   console.log("oops after function");
-      //   return (
-      //     <View style={styles.mainContainer}>
-      //       <Text
-      //         style={styles.header}
-      //       >{`Filtered result ${this.props.navigation.state.params.name.toUpperCase()}`}</Text>
-      //       <ScrollView>
-      //         {/* <List >
-      //           {this.state.searched_books.map((book, i) => (
-      //             <ListItem
-      //               key={i}
-      //               title={`${book.title}`}
-      //               subtitle={`${book.authors[0].name}`}
-      //             />
-      //           ))}
-      //         </List> */}              
-      //         <ListView
-      //           dataSource={this.state.dataSource} 
-      //           renderRow={rowData => {
-      //             return (
-      //                 <View style={{ flex: 1 }}>
-      //                   <Text style={styles.title}>
-      //                     {rowData.title}
-      //                   </Text>
-      //                   <Text >
-      //                     {rowData.authors[0].name}
-      //                   </Text>
-      //                 </View>
-      //             );
-      //           }}
-      //         />
-      //       </ScrollView>
-      //     </View>
-      //   );
-      // }
+      }
+      else {
+        this.fetchSearchedBooks();
+        return (
+          <View style={[styles.container, styles.horizontal]}>
+            <Text style={styles.header}>
+              {`${this.props.navigation.state.params.name.toUpperCase()}`}
+            </Text>
+            <View style={styles.listItem}>           
+              <ListView
+                dataSource={this.state.dataSource} 
+                renderRow={rowData => {
+                  return (
+                  <View style={{ flex: 1 , borderBottomWidth: 1}}>
+                  <Text style={styles.title}>
+                    {rowData.title}
+                  </Text>
+                  <Text style={styles.subtitle}>
+                    {rowData.authors[0].name}
+                  </Text>
+                  </View>
+            );
+                }}
+              />
+            </View>
+          </View>
+        );
+      }
     }
   }
 }
@@ -186,11 +200,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#d6d7da',
     padding: 6,
   },
-  // mainContainer: {
-  //   flex: 1,
-  //   marginBottom: 30,
-  //   padding: 10
-  // },
   header: {
     color: "#5c57e2",
     fontSize: 20,
