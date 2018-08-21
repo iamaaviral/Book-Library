@@ -15,18 +15,22 @@ class BookDetail extends Component {
     this.state = {
       dataSource: null,
       books: null,
-      searched_books: [],
+      searched_books: null,
       loading: false,
       isLoadingMore: false,
       moreBooks: 1
     };
     this.fetchMore = this.fetchMore.bind(this);
     this.fetchData = this.fetchData.bind(this);
+    this.fetchSearchedBooks = this.fetchSearchedBooks.bind(this);
   }
 
   fetchData(callback) {
-    const params = this.state.moreBooks
-  fetch(`http://skunkworks.ignitesol.com:8000/books/?page=${params}&topic=${this.props.navigation.state.params.name}`)
+    const params = this.state.moreBooks;
+    const search = this.props.navigation.getParam("searchedBooks") !== undefined
+    ? `&search=${this.props.navigation.getParam("searchedBooks")}`
+    : "";
+  fetch(`http://skunkworks.ignitesol.com:8000/books/?page=${params}&topic=${this.props.navigation.state.params.name}${search}`)
       .then(response => response.json())
       .then(callback)
       .catch(error => {
@@ -60,21 +64,22 @@ class BookDetail extends Component {
     })
   }
 
-  async fetchSearchedBooks() {
-    await fetch(
-      "http://skunkworks.ignitesol.com:8000/books?search=" +
-        this.props.navigation.state.params.searchedBooks
-    )
-      .then(response => response.json())
-      .then(responseJson => {
+  fetchSearchedBooks() {
+    this.fetchData(responseJson => {     
+      let ds = new ListView.DataSource({
+      rowHasChanged: (r1, r2) => r1 !== r2
+    });
+    console.log(responseJson.results);
         let filter_search = responseJson.results.filter(o =>
           this.state.books.find(o2 => o.id === o2.id)
         );
-        this.setState({ searched_books: filter_search });
+        
+    console.log(filter_search);
+        this.setState({ 
+          searched_books: filter_search,        
+          dataSource: ds.cloneWithRows(filter_search),
+        });
       })
-      .catch(error => {
-        console.error(error);
-      });
   }
 
   render() {
@@ -86,21 +91,13 @@ class BookDetail extends Component {
       );
     } else {
       if (this.props.navigation.getParam("searchedBooks") == undefined) {
+        console.log("Hooray");
         return (
           <View style={styles.mainContainer}>
             <Text
               style={styles.header}
             >{`${this.props.navigation.state.params.name.toUpperCase()}`}</Text>
             <ScrollView>
-              {/* <List style={{ flex: 1, flexDirection: "column" }}>
-                {this.state.books.map((book, i) => (
-                  <ListItem
-                    key={i}
-                    title={`${book.title}`}
-                    subtitle={`${book.authors[0].name}`}
-                  />
-                ))}
-              </List> */}
               <ListView
                 dataSource={this.state.dataSource} 
                 renderRow={rowData => {
@@ -129,14 +126,16 @@ class BookDetail extends Component {
           </View>
         );
       } else {
+        console.log("oops");
         this.fetchSearchedBooks();
+        console.log("oops after function");
         return (
           <View style={styles.mainContainer}>
             <Text
               style={styles.header}
-            >{`${this.props.navigation.state.params.name.toUpperCase()}`}</Text>
+            >{`Filtered result ${this.props.navigation.state.params.name.toUpperCase()}`}</Text>
             <ScrollView>
-              <List >
+              {/* <List >
                 {this.state.searched_books.map((book, i) => (
                   <ListItem
                     key={i}
@@ -144,7 +143,22 @@ class BookDetail extends Component {
                     subtitle={`${book.authors[0].name}`}
                   />
                 ))}
-              </List>
+              </List> */}              
+              <ListView
+                dataSource={this.state.dataSource} 
+                renderRow={rowData => {
+                  return (
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.title}>
+                          {rowData.title}
+                        </Text>
+                        <Text >
+                          {rowData.authors[0].name}
+                        </Text>
+                      </View>
+                  );
+                }}
+              />
             </ScrollView>
           </View>
         );
