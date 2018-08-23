@@ -11,21 +11,19 @@ import { SearchBar } from "react-native-elements";
 class BookDetail extends Component {
   static navigationOptions = ({ navigation }) => ({
     headerTitle: (
-      <View style={{ width: 300 }}>
         <SearchBar
           containerStyle={{
             backgroundColor: "transparent",
             borderTopColor: "transparent",
-            borderBottomColor: "#9877f4"
+            borderBottomColor: "transparent",
+            width: 300
           }}
-          inputStyle={{ backgroundColor: "#5c57e2", margin: 0, color: "white" }}
+          inputStyle={{ backgroundColor: "#5c57e2", color: "white",
+          marginLeft: -10 }}
           placeholderTextColor={"#9877f4"}
           noIcon
           placeholder={"Search"}
-          clearIcon={{ color: "red" }}
-          onClear={() => {
-            console.log("Clicked");
-          }}
+          clearIcon={{ color: "white" }}
           onChangeText={text => navigation.setParams({ text })}
           onSubmitEditing={() => {
             navigation.setParams({
@@ -35,7 +33,6 @@ class BookDetail extends Component {
             });
           }}
         />
-      </View>
     )
   });
 
