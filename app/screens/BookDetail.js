@@ -50,21 +50,18 @@ class BookDetail extends Component {
       moreBooks: `http://skunkworks.ignitesol.com:8000/books/?topic=${
         this.props.navigation.state.params.name
       }`
-    };
+    }; 
     this.fetchMore = this.fetchMore.bind(this);
     this.fetchData = this.fetchData.bind(this);
     this.fetchSearchedBooks = this.fetchSearchedBooks.bind(this);
   }
 
   fetchData(callback) {
-    let params = this.state.moreBooks !== "" ? this.state.moreBooks : "";
-    let search = this.props.navigation.state.params.sParameter;
-
     if (this.props.navigation.state.params.sParameter !== undefined) {
       fetch(
         `http://skunkworks.ignitesol.com:8000/books/?topic=${
           this.props.navigation.state.params.name
-        }&search=${search}`
+        }&search=${this.props.navigation.state.params.sParameter}`
       )
         .then(response => response.json())
         .then(callback)
@@ -74,7 +71,7 @@ class BookDetail extends Component {
       // params = "";
       // search = `&search=${this.props.navigation.state.params.sParameter}`
     } else {
-      fetch(`${params}`)
+      fetch(`${this.state.moreBooks}`)
         .then(response => response.json())
         .then(callback)
         .catch(error => {
@@ -107,6 +104,7 @@ class BookDetail extends Component {
       this.setState({
         dataSource: ds.cloneWithRows(responseJson.results),
         books: responseJson.results,
+        moreBooks: responseJson.next,
         loading: false
       });
     });
@@ -151,22 +149,32 @@ class BookDetail extends Component {
                     <View style={{ flex: 1, borderBottomWidth: 1 }}>
                       <Text style={styles.title}>{rowData.title}</Text>
                       <Text style={styles.subtitle}>
-                        {rowData.authors[0].name}
+                        {rowData.authors[0] !== undefined ? rowData.authors[0].name : "AUTHOR NOT FOUND"}
                       </Text>
                     </View>
                   );
                 }}
-                onEndReached={() =>
-                  this.setState({ isLoadingMore: true }, () => this.fetchMore())
+                onEndReached={() => {
+                  this.state.moreBooks!== null ? this.setState({ isLoadingMore: true }, () => this.fetchMore()) : this.setState({ isLoadingMore: false })
+                  }
                 }
                 renderFooter={() => {
+                  if(this.state.isLoadingMore){
                   return (
                     this.state.isLoadingMore && (
                       <View style={{ flex: 1 }}>
                         <ActivityIndicator size="large" color="#5c57e2" />
                       </View>
                     )
-                  );
+                  );} else{
+                    return (
+                      this.state.isLoadingMore && (
+                        <View style={{ flex: 1 }}>
+                            <Text>NO MORE BOOKS FOUND !!</Text>
+                        </View>
+                      )
+                    );
+                  }
                 }}
               />
             </View>
@@ -187,7 +195,7 @@ class BookDetail extends Component {
                     <View style={{ flex: 1, borderBottomWidth: 1 }}>
                       <Text style={styles.title}>{rowData.title}</Text>
                       <Text style={styles.subtitle}>
-                        {rowData.authors[0].name}
+                        {rowData.authors[0] !== undefined ? rowData.authors[0].name : "AUTHOR NOT FOUND"}
                       </Text>
                     </View>
                   );
