@@ -7,13 +7,13 @@ import {
 } from "react-native";
 
 import Loader from '../constants/loader'
+import SearchResults from './SearchResults'
 
 class BookDetail extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      dataSource: null,
       searchDataSource: null,
       books: null,
       searched_books: null,
@@ -145,36 +145,13 @@ class BookDetail extends Component {
           </View>
         );
       } else {
-        if(this.state.searched_books === null || this.state.searched_books.length === 0){
-          return (
-            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-              <Text>No results found</Text>
-            </View>
-          );
-        } else {
-          return (
-            <View style={[styles.container, styles.horizontal]}>
-              <Text style={styles.header}>
-                {`${params.name.toUpperCase()}`}
-              </Text>
-              <View style={styles.listItem}>
-                <ListView
-                  dataSource={this.state.searchDataSource}
-                  renderRow={rowData => {
-                    return (
-                      <View style={{ flex: 1, borderBottomWidth: 1 }}>
-                        <Text style={styles.title}>{rowData.title}</Text>
-                        <Text style={styles.subtitle}>
-                          {rowData.authors[0] !== undefined ? rowData.authors[0].name : "AUTHOR NOT FOUND"}
-                        </Text>
-                      </View>
-                    );
-                  }}
-                />
-              </View>
-            </View>
-          );
-        }
+        return (
+          <SearchResults 
+            searchedBooks={this.state.searched_books} 
+            params={this.props.navigation.state.params} 
+            searchDataSource={this.state.searchDataSource}
+            />
+        )
       }
     }
   }
