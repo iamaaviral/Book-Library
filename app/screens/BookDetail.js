@@ -81,13 +81,9 @@ class BookDetail extends Component {
     this.props.navigation.setParams({fetchSearchedBooks: this.fetchSearchedBooks});
   }
 
-  componentDidMount() {
-    console.log(this.props.navigation.state.params);
-  }
-
-  fetchSearchedBooks() {
-    this.fetchData(responseJson => {
-      let sds = new ListView.DataSource({
+   fetchSearchedBooks() {
+     this.fetchData(responseJson => {
+      let ds = new ListView.DataSource({
         rowHasChanged: (r1, r2) => r1 !== r2
       });
       let filter_search = responseJson.results.filter(o =>
@@ -95,12 +91,13 @@ class BookDetail extends Component {
       );
       this.setState({
         searched_books: filter_search,
-        searchDataSource: sds.cloneWithRows(filter_search)
+        searchDataSource: ds.cloneWithRows(filter_search)
       });
     });
   }
 
   render() {
+    const params = this.props.navigation.state.params;
     const { sParameter } = this.props.navigation.state.params;
 
     if (this.state.loading) {
@@ -110,11 +107,11 @@ class BookDetail extends Component {
         return (
           <View style={[styles.container, styles.horizontal]}>
             <Text style={styles.header}>
-              {`${this.props.navigation.state.params.name.toUpperCase()}`}
+              {`${params.name.toUpperCase()}`}
             </Text>
             <View style={styles.listItem}>
               <ListView
-                dataSource={this.props.navigation.state.params.ds}
+                dataSource={params.ds}
                 renderRow={rowData => {
                   return (
                     <View style={{ flex: 1, borderBottomWidth: 1 }}>
@@ -158,7 +155,7 @@ class BookDetail extends Component {
           return (
             <View style={[styles.container, styles.horizontal]}>
               <Text style={styles.header}>
-                {`${this.props.navigation.state.params.name.toUpperCase()}`}
+                {`${params.name.toUpperCase()}`}
               </Text>
               <View style={styles.listItem}>
                 <ListView
