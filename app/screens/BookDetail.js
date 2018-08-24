@@ -3,43 +3,18 @@ import {
   ListView,
   Text,
   View,
-  ActivityIndicator,
   StyleSheet
 } from "react-native";
-import { SearchBar } from "react-native-elements";
+
+import Loader from '../constants/loader'
 
 class BookDetail extends Component {
-  static navigationOptions = ({ navigation }) => ({
-    headerTitle: (
-        <SearchBar
-          containerStyle={{
-            backgroundColor: "transparent",
-            borderTopColor: "transparent",
-            borderBottomColor: "transparent",
-            width: 300
-          }}
-          inputStyle={{ backgroundColor: "#5c57e2", color: "white", marginLeft: -10 }}
-          placeholderTextColor={"#9877f4"}
-          noIcon
-          placeholder={"Search"}
-          clearIcon={{ color: "white" }}
-          onChangeText={text => navigation.setParams({ text })}
-          onSubmitEditing={async () => {
-            await navigation.setParams({
-              sParameter: encodeURIComponent(
-                navigation.state.params.text.trim()
-              )
-            }); 
-            navigation.state.params.fetchSearchedBooks();
-          }}
-        />
-    )
-  });
 
   constructor(props) {
     super(props);
     this.state = {
       dataSource: null,
+      searchDataSource: null,
       books: null,
       searched_books: null,
       loading: true,
@@ -77,9 +52,12 @@ class BookDetail extends Component {
 
   fetchMore() {
     this.fetchData(responseJson => {
+      let ds = new ListView.DataSource({
+        rowHasChanged: (r1, r2) => r1 !== r2
+      });
       const data = this.state.books.concat(responseJson.results);
+      this.props.navigation.setParams({ds: ds.cloneWithRows(data)});
       this.setState({
-        dataSource: this.state.dataSource.cloneWithRows(data),
         books: data,
         isLoadingMore: false,
         moreBooks: responseJson.next
@@ -93,20 +71,23 @@ class BookDetail extends Component {
       let ds = new ListView.DataSource({
         rowHasChanged: (r1, r2) => r1 !== r2
       });
+      this.props.navigation.setParams({ds: ds.cloneWithRows(responseJson.results)});
       this.setState({
-        dataSource: ds.cloneWithRows(responseJson.results),
         books: responseJson.results,
         moreBooks: responseJson.next,
         loading: false
       });
-      this.props.navigation.setParams({fetchSearchedBooks: this.fetchSearchedBooks});
     });
-    console.log( this.props.navigation.state.params.sParameter);
+    this.props.navigation.setParams({fetchSearchedBooks: this.fetchSearchedBooks});
+  }
+
+  componentDidMount() {
+    console.log(this.props.navigation.state.params);
   }
 
   fetchSearchedBooks() {
     this.fetchData(responseJson => {
-      let ds = new ListView.DataSource({
+      let sds = new ListView.DataSource({
         rowHasChanged: (r1, r2) => r1 !== r2
       });
       let filter_search = responseJson.results.filter(o =>
@@ -114,7 +95,7 @@ class BookDetail extends Component {
       );
       this.setState({
         searched_books: filter_search,
-        dataSource: ds.cloneWithRows(filter_search)
+        searchDataSource: sds.cloneWithRows(filter_search)
       });
     });
   }
@@ -123,13 +104,9 @@ class BookDetail extends Component {
     const { sParameter } = this.props.navigation.state.params;
 
     if (this.state.loading) {
-      return (
-        <View style={[styles.container, styles.horizontal]}>
-          <ActivityIndicator size="large" color="#5c57e2" />
-        </View>
-      );
+     return <Loader />
     } else {
-      if (sParameter === undefined) {
+      if (sParameter === undefined || sParameter === "") {
         return (
           <View style={[styles.container, styles.horizontal]}>
             <Text style={styles.header}>
@@ -137,7 +114,7 @@ class BookDetail extends Component {
             </Text>
             <View style={styles.listItem}>
               <ListView
-                dataSource={this.state.dataSource}
+                dataSource={this.props.navigation.state.params.ds}
                 renderRow={rowData => {
                   return (
                     <View style={{ flex: 1, borderBottomWidth: 1 }}>
@@ -155,11 +132,7 @@ class BookDetail extends Component {
                 renderFooter={() => {
                   if(this.state.isLoadingMore){
                   return (
-                    this.state.isLoadingMore && (
-                      <View style={{ flex: 1 }}>
-                        <ActivityIndicator size="large" color="#5c57e2" />
-                      </View>
-                    )
+                    this.state.isLoadingMore && (<Loader />)
                   );} else{
                     return (
                       this.state.isLoadingMore && (
@@ -189,7 +162,7 @@ class BookDetail extends Component {
               </Text>
               <View style={styles.listItem}>
                 <ListView
-                  dataSource={this.state.dataSource}
+                  dataSource={this.state.searchDataSource}
                   renderRow={rowData => {
                     return (
                       <View style={{ flex: 1, borderBottomWidth: 1 }}>
