@@ -8,12 +8,11 @@ import {
 
 import Loader from '../constants/loader'
 
-class SearchResults extends React.Component {
-    render() {
-        if(this.props.searchedBooks === null){
+const SearchResults= props => {
+        if(props.searchedBooks === null){
             return <Loader />
           } else {
-            if(this.props.searchedBooks.length === 0){
+            if(props.searchedBooks.length === 0){
               return (
                 <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
                   <Text>No results found</Text>
@@ -23,11 +22,11 @@ class SearchResults extends React.Component {
               return (
                 <View style={[styles.container, styles.horizontal]}>
                   <Text style={styles.header}>
-                    {`${this.props.params.name.toUpperCase()}`}
+                    {`${props.params.name.toUpperCase()}`}
                   </Text>
                   <View style={styles.listItem}>
                     <ListView
-                      dataSource={this.props.searchDataSource}
+                      dataSource={props.searchDataSource}
                       renderRow={rowData => {
                         return (
                           <View style={{ flex: 1, borderBottomWidth: 1 }}>
@@ -44,7 +43,6 @@ class SearchResults extends React.Component {
           );
             }
           }
-    }
   }
 
 
