@@ -18,19 +18,19 @@ class BookDetail extends Component {
             borderBottomColor: "transparent",
             width: 300
           }}
-          inputStyle={{ backgroundColor: "#5c57e2", color: "white",
-          marginLeft: -10 }}
+          inputStyle={{ backgroundColor: "#5c57e2", color: "white", marginLeft: -10 }}
           placeholderTextColor={"#9877f4"}
           noIcon
           placeholder={"Search"}
           clearIcon={{ color: "white" }}
           onChangeText={text => navigation.setParams({ text })}
-          onSubmitEditing={() => {
-            navigation.setParams({
+          onSubmitEditing={async () => {
+            await navigation.setParams({
               sParameter: encodeURIComponent(
                 navigation.state.params.text.trim()
               )
-            });
+            }); 
+            navigation.state.params.fetchSearchedBooks();
           }}
         />
     )
@@ -65,8 +65,6 @@ class BookDetail extends Component {
         .catch(error => {
           console.error(error);
         });
-      // params = "";
-      // search = `&search=${this.props.navigation.state.params.sParameter}`
     } else {
       fetch(`${this.state.moreBooks}`)
         .then(response => response.json())
@@ -75,9 +73,6 @@ class BookDetail extends Component {
           console.error(error);
         });
     }
-    // const search = this.props.navigation.state.params.sParameter !== undefined
-    // ? `&search=${this.props.navigation.state.params.sParameter}`
-    // : "";
   }
 
   fetchMore() {
@@ -92,7 +87,7 @@ class BookDetail extends Component {
     });
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.setState({ loading: true });
     this.fetchData(responseJson => {
       let ds = new ListView.DataSource({
@@ -104,7 +99,9 @@ class BookDetail extends Component {
         moreBooks: responseJson.next,
         loading: false
       });
+      this.props.navigation.setParams({fetchSearchedBooks: this.fetchSearchedBooks});
     });
+    console.log( this.props.navigation.state.params.sParameter);
   }
 
   fetchSearchedBooks() {
@@ -132,7 +129,7 @@ class BookDetail extends Component {
         </View>
       );
     } else {
-      if (sParameter == undefined) {
+      if (sParameter === undefined) {
         return (
           <View style={[styles.container, styles.horizontal]}>
             <Text style={styles.header}>
@@ -178,29 +175,36 @@ class BookDetail extends Component {
           </View>
         );
       } else {
-        this.fetchSearchedBooks();
-        return (
-          <View style={[styles.container, styles.horizontal]}>
-            <Text style={styles.header}>
-              {`${this.props.navigation.state.params.name.toUpperCase()}`}
-            </Text>
-            <View style={styles.listItem}>
-              <ListView
-                dataSource={this.state.dataSource}
-                renderRow={rowData => {
-                  return (
-                    <View style={{ flex: 1, borderBottomWidth: 1 }}>
-                      <Text style={styles.title}>{rowData.title}</Text>
-                      <Text style={styles.subtitle}>
-                        {rowData.authors[0] !== undefined ? rowData.authors[0].name : "AUTHOR NOT FOUND"}
-                      </Text>
-                    </View>
-                  );
-                }}
-              />
+        if(this.state.searched_books === null || this.state.searched_books.length === 0){
+          return (
+            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+              <Text>No results found</Text>
             </View>
-          </View>
-        );
+          );
+        } else {
+          return (
+            <View style={[styles.container, styles.horizontal]}>
+              <Text style={styles.header}>
+                {`${this.props.navigation.state.params.name.toUpperCase()}`}
+              </Text>
+              <View style={styles.listItem}>
+                <ListView
+                  dataSource={this.state.dataSource}
+                  renderRow={rowData => {
+                    return (
+                      <View style={{ flex: 1, borderBottomWidth: 1 }}>
+                        <Text style={styles.title}>{rowData.title}</Text>
+                        <Text style={styles.subtitle}>
+                          {rowData.authors[0] !== undefined ? rowData.authors[0].name : "AUTHOR NOT FOUND"}
+                        </Text>
+                      </View>
+                    );
+                  }}
+                />
+              </View>
+            </View>
+          );
+        }
       }
     }
   }
