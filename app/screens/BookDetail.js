@@ -4,14 +4,17 @@ import {
   Text,
   View,
   StyleSheet,
-  Image
+  Image,
+  Dimensions,
+  Platform
 } from "react-native";
 
-import Loader from '../constants/loader'
-import SearchResults from './SearchResults'
+import Loader from "../constants/loader";
+import SearchResults from "./SearchResults";
+
+const width = Dimensions.get("window").width;
 
 class BookDetail extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -23,14 +26,14 @@ class BookDetail extends Component {
       moreBooks: `http://skunkworks.ignitesol.com:8000/books/?topic=${
         this.props.navigation.state.params.name
       }`
-    }; 
+    };
     this.fetchMore = this.fetchMore.bind(this);
     this.fetchData = this.fetchData.bind(this);
     this.fetchSearchedBooks = this.fetchSearchedBooks.bind(this);
   }
 
   fetchData(callback) {
-    if (!this.props.navigation.state.params.sParameter ) {
+    if (!this.props.navigation.state.params.sParameter) {
       fetch(`${this.state.moreBooks}`)
         .then(response => response.json())
         .then(callback)
@@ -57,7 +60,7 @@ class BookDetail extends Component {
         rowHasChanged: (r1, r2) => r1 !== r2
       });
       const data = this.state.books.concat(responseJson.results);
-      this.props.navigation.setParams({ds: ds.cloneWithRows(data)});
+      this.props.navigation.setParams({ ds: ds.cloneWithRows(data) });
       this.setState({
         books: data,
         isLoadingMore: false,
@@ -72,19 +75,22 @@ class BookDetail extends Component {
       let ds = new ListView.DataSource({
         rowHasChanged: (r1, r2) => r1 !== r2
       });
-      this.props.navigation.setParams({ds: ds.cloneWithRows(responseJson.results)});
+      this.props.navigation.setParams({
+        ds: ds.cloneWithRows(responseJson.results)
+      });
       this.setState({
         books: responseJson.results,
         moreBooks: responseJson.next,
         loading: false
       });
-      console.log(responseJson.results);
     });
-    this.props.navigation.setParams({fetchSearchedBooks: this.fetchSearchedBooks});
+    this.props.navigation.setParams({
+      fetchSearchedBooks: this.fetchSearchedBooks
+    });
   }
 
-   fetchSearchedBooks() {
-     this.fetchData(responseJson => {
+  fetchSearchedBooks() {
+    this.fetchData(responseJson => {
       let ds = new ListView.DataSource({
         rowHasChanged: (r1, r2) => r1 !== r2
       });
@@ -103,67 +109,68 @@ class BookDetail extends Component {
     const { sParameter } = this.props.navigation.state.params;
 
     if (this.state.loading) {
-     return <Loader />
+      return <Loader />;
     } else {
-      if ( !sParameter || sParameter === "") {
+      if (!sParameter || sParameter === "") {
         return (
           <View style={[styles.container, styles.horizontal]}>
-            <Text style={styles.header}>
-              {`${params.name.toUpperCase()}`}
-            </Text>
-            <View style={styles.listItem}>
-              <ListView
-                dataSource={params.ds}
-                renderRow={rowData => {
-                  return (
-                    <View style={{ flex: 1, borderBottomWidth: 1 }}>
-                     <View style={styles.imageWrapper}>
+            <Text style={styles.header}>{`${params.name.toUpperCase()}`}</Text>
+            <ListView
+              contentContainerStyle={styles.listView}
+              dataSource={params.ds}
+              renderRow={rowData => {
+                return (
+                  <View style={styles.card}>
+                    <View style={styles.imageWrapper}>
                       <Image
-                        style={{ width: 70, height: 70 }}
+                        style={{ width: "100%", height: 180, borderRadius: 10 }}
                         source={{
-                          uri: !rowData.formats['image/jpeg']
+                          uri: !rowData.formats["image/jpeg"]
                             ? "https://via.placeholder.com/70x70.jpg"
-                            : rowData.formats['image/jpeg']
+                            : rowData.formats["image/jpeg"]
                         }}
                       />
-                      </View>
-                      <Text style={styles.title}>{rowData.title}</Text>
-                      <Text style={styles.subtitle}>
-                        {!rowData.authors[0] ? "AUTHOR NOT FOUND" : rowData.authors[0].name}
-                      </Text>
                     </View>
-                  );
-                }}
-                onEndReached={() => {
-                  this.state.moreBooks!== null ? this.setState({ isLoadingMore: true }, () => this.fetchMore()) : this.setState({ isLoadingMore: false })
-                  }
-                }
-                renderFooter={() => {
-                  if(this.state.isLoadingMore){
+                    <Text style={styles.title}>{rowData.title}</Text>
+                    <Text style={styles.subtitle}>
+                      {!rowData.authors[0]
+                        ? "AUTHOR NOT FOUND"
+                        : rowData.authors[0].name}
+                    </Text>
+                  </View>
+                );
+              }}
+              onEndReached={() => {
+                this.state.moreBooks !== null
+                  ? this.setState({ isLoadingMore: true }, () =>
+                      this.fetchMore()
+                    )
+                  : this.setState({ isLoadingMore: false });
+              }}
+              renderFooter={() => {
+                if (this.state.isLoadingMore) {
+                  return this.state.isLoadingMore && <Loader />;
+                } else {
                   return (
-                    this.state.isLoadingMore && (<Loader />)
-                  );} else{
-                    return (
-                      this.state.isLoadingMore && (
-                        <View style={{ flex: 1 }}>
-                            <Text>NO MORE BOOKS FOUND !!</Text>
-                        </View>
-                      )
-                    );
-                  }
-                }}
-              />
-            </View>
+                    this.state.isLoadingMore && (
+                      <View style={{ flex: 1 }}>
+                        <Text>NO MORE BOOKS FOUND !!</Text>
+                      </View>
+                    )
+                  );
+                }
+              }}
+            />
           </View>
         );
       } else {
         return (
-          <SearchResults 
-            searchedBooks={this.state.searched_books} 
-            params={this.props.navigation.state.params} 
+          <SearchResults
+            searchedBooks={this.state.searched_books}
+            params={this.props.navigation.state.params}
             searchDataSource={this.state.searchDataSource}
-            />
-        )
+          />
+        );
       }
     }
   }
@@ -176,15 +183,8 @@ const styles = StyleSheet.create({
   },
   horizontal: {
     flexDirection: "column",
-    justifyContent: "space-around",
+    justifyContent: "space-evenly",
     padding: 10
-  },
-  listItem: {
-    flex: 1,
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#d6d7da",
-    padding: 6
   },
   header: {
     color: "#5c57e2",
@@ -204,8 +204,30 @@ const styles = StyleSheet.create({
     marginBottom: 6
   },
   imageWrapper: {
-    padding: 5
+    shadowColor: "#202020",
+    ...Platform.select({
+      ios: {
+        shadowColor: "grey",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.5,
+        shadowRadius: 2
+      },
+      android: {
+        elevation: 10,
+        borderRadius: 2
+      }
+    })
   },
+  listView: {
+    flexDirection: "row",
+    flexWrap: "wrap"
+  },
+  card: {
+    // width: (width / 2) - 25,
+    width: 150,
+    marginLeft: 15,
+    marginTop: 15
+  }
 });
 
 export default BookDetail;
