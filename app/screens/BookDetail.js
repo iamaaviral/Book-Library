@@ -3,7 +3,8 @@ import {
   ListView,
   Text,
   View,
-  StyleSheet
+  StyleSheet,
+  Image
 } from "react-native";
 
 import Loader from '../constants/loader'
@@ -29,19 +30,19 @@ class BookDetail extends Component {
   }
 
   fetchData(callback) {
-    if (this.props.navigation.state.params.sParameter !== undefined) {
-      fetch(
-        `http://skunkworks.ignitesol.com:8000/books/?topic=${
-          this.props.navigation.state.params.name
-        }&search=${this.props.navigation.state.params.sParameter}`
-      )
+    if (!this.props.navigation.state.params.sParameter ) {
+      fetch(`${this.state.moreBooks}`)
         .then(response => response.json())
         .then(callback)
         .catch(error => {
           console.error(error);
         });
     } else {
-      fetch(`${this.state.moreBooks}`)
+      fetch(
+        `http://skunkworks.ignitesol.com:8000/books/?topic=${
+          this.props.navigation.state.params.name
+        }&search=${this.props.navigation.state.params.sParameter}`
+      )
         .then(response => response.json())
         .then(callback)
         .catch(error => {
@@ -77,6 +78,7 @@ class BookDetail extends Component {
         moreBooks: responseJson.next,
         loading: false
       });
+      console.log(responseJson.results);
     });
     this.props.navigation.setParams({fetchSearchedBooks: this.fetchSearchedBooks});
   }
@@ -103,7 +105,7 @@ class BookDetail extends Component {
     if (this.state.loading) {
      return <Loader />
     } else {
-      if (sParameter === undefined || sParameter === "") {
+      if ( !sParameter || sParameter === "") {
         return (
           <View style={[styles.container, styles.horizontal]}>
             <Text style={styles.header}>
@@ -115,9 +117,19 @@ class BookDetail extends Component {
                 renderRow={rowData => {
                   return (
                     <View style={{ flex: 1, borderBottomWidth: 1 }}>
+                     <View style={styles.imageWrapper}>
+                      <Image
+                        style={{ width: 70, height: 70 }}
+                        source={{
+                          uri: !rowData.formats['image/jpeg']
+                            ? "https://via.placeholder.com/70x70.jpg"
+                            : rowData.formats['image/jpeg']
+                        }}
+                      />
+                      </View>
                       <Text style={styles.title}>{rowData.title}</Text>
                       <Text style={styles.subtitle}>
-                        {rowData.authors[0] !== undefined ? rowData.authors[0].name : "AUTHOR NOT FOUND"}
+                        {!rowData.authors[0] ? "AUTHOR NOT FOUND" : rowData.authors[0].name}
                       </Text>
                     </View>
                   );
@@ -190,7 +202,10 @@ const styles = StyleSheet.create({
     fontSize: 10,
     textAlign: "left",
     marginBottom: 6
-  }
+  },
+  imageWrapper: {
+    padding: 5
+  },
 });
 
 export default BookDetail;

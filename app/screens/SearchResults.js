@@ -3,13 +3,14 @@ import {
   View,
   Text,
   ListView,
-  StyleSheet
+  StyleSheet,
+  Image
 } from "react-native";
 
 import Loader from '../constants/loader'
 
 const SearchResults= props => {
-        if(props.searchedBooks === null){
+        if(!props.searchedBooks){
             return <Loader />
           } else {
             if(props.searchedBooks.length === 0){
@@ -30,9 +31,19 @@ const SearchResults= props => {
                       renderRow={rowData => {
                         return (
                           <View style={{ flex: 1, borderBottomWidth: 1 }}>
+                          <View style={styles.imageWrapper}>
+                           <Image
+                             style={{ width: 70, height: 70 }}
+                             source={{
+                               uri: !rowData.formats['image/jpeg']
+                                 ? "https://via.placeholder.com/70x70.jpg"
+                                 : rowData.formats['image/jpeg']
+                             }}
+                           />
+                           </View>
                             <Text style={styles.title}>{rowData.title}</Text>
                             <Text style={styles.subtitle}>
-                              {rowData.authors[0] !== undefined ? rowData.authors[0].name : "AUTHOR NOT FOUND"}
+                              {!rowData.authors[0] ? "AUTHOR NOT FOUND" : rowData.authors[0].name}
                             </Text>
                           </View>
                         );
@@ -79,6 +90,9 @@ const SearchResults= props => {
       fontSize: 10,
       textAlign: "left",
       marginBottom: 6
+    },
+    imageWrapper: {
+      padding: 5
     }
   });
 
