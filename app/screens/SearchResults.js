@@ -27,6 +27,7 @@ const SearchResults = props => {
             {`${props.params.name.toUpperCase()}`}
           </Text>
           <ListView
+            contentContainerStyle={styles.listView}
             dataSource={props.searchDataSource}
             renderRow={rowData => {
               return (
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
   },
   horizontal: {
     flexDirection: "column",
-    justifyContent: "space-around",
+    justifyContent: "space-evenly",
     padding: 10
   },
   header: {
