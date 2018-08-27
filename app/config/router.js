@@ -1,4 +1,8 @@
 import React from "react";
+import {
+  View,Platform,
+} from "react-native";
+
 import { createStackNavigator } from "react-navigation";
 import { SearchBar, Button } from "react-native-elements";
 
@@ -19,23 +23,18 @@ export const Root = createStackNavigator({
         backgroundColor: "#5c57e2"
       },
       headerTintColor: "white", 
-      headerRight: (
-        <Button
-          onPress={() => navigation.setParams({"sParameter": undefined})}
-          title="cancel"
-          color="#fff"
-          backgroundColor= "transparent"
-        />
-      ),
+      // headerRight: (
+      // ),
       headerTitle: (
+        <View style={{ flex: 1, flexDirection:'row', alignItems: 'center'}}>
+          <View style={{ flex: 1}}>
           <SearchBar
             containerStyle={{
               backgroundColor: "transparent",
               borderTopColor: "transparent",
-              borderBottomColor: "transparent",
-              width: 300
+              borderBottomColor: "transparent"
             }}
-            inputStyle={{ backgroundColor: "#5c57e2", color: "white", marginLeft: -10 }}
+            inputStyle={{ backgroundColor: "#5c57e2", color: "white" }}
             placeholderTextColor={"#9877f4"}
             noIcon
             placeholder={"Search"}
@@ -49,6 +48,14 @@ export const Root = createStackNavigator({
               navigation.state.params.fetchSearchedBooks();
             }}
           />
+          </View>
+          <Button
+            onPress={() => navigation.setParams({"sParameter": undefined})}
+            title="cancel"
+            color="#fff"
+            backgroundColor= "transparent"
+          />
+        </View>
       )
     })
   }
