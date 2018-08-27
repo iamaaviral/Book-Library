@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Text, ListView, StyleSheet, Image } from "react-native";
+import { View, Text, ListView, StyleSheet, Image,Platform } from "react-native";
 
 import Loader from "../constants/loader";
 

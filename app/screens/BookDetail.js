@@ -5,14 +5,11 @@ import {
   View,
   StyleSheet,
   Image,
-  Dimensions,
   Platform
 } from "react-native";
 
 import Loader from "../constants/loader";
 import SearchResults from "./SearchResults";
-
-const width = Dimensions.get("window").width;
 
 class BookDetail extends Component {
   constructor(props) {
