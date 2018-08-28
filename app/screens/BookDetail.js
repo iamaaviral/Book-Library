@@ -201,7 +201,6 @@ const styles = StyleSheet.create({
     marginBottom: 6
   },
   imageWrapper: {
-    shadowColor: "#202020",
     ...Platform.select({
       ios: {
         shadowColor: "grey",
@@ -220,7 +219,6 @@ const styles = StyleSheet.create({
     flexWrap: "wrap"
   },
   card: {
-    // width: (width / 2) - 25,
     width: 150,
     marginLeft: 15,
     marginTop: 15
